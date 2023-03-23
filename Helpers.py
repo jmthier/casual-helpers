@@ -6,17 +6,14 @@
 import datetime as datetime
 import os
 
-# "Global" vars stored here
-DateTimeNow = datetime.datetime.now()
-DateTimeStamp = "_" + DateTimeNow
+# "Global" variables stored here
+DateTimeStart = datetime.datetime.now()
 DebugLogFName = ""
 DataOutFName = ""
 ConsoleOutFName = ""
 DebugLogDirectory = os.getcwd() + "\\"
 DataOutDirectory = os.getcwd() + "\\"
 ConsoleOutDirectory = os.getcwd() + "\\"
-DateTimeNow = datetime.datetime.now()
-DateTimeStamp = "_" + str(DateTimeNow)
 
 # User Settings
 LogDebugMessages = False
@@ -33,34 +30,54 @@ def ExitError(mess):
 
 # prints a message that can be overwritten unless next print() begins with \n
 def PrintOver(mess, end=False):
-    line = "\r" + str(mess)
-    print(line, end="", flush=True)
-    if end:
-        print("\n")
+    global PrintConsoleOutput
+
+    if PrintConsoleOutput:
+        line = "\r" + str(mess)
+        print(line, end="", flush=True)
+        if end:
+            print("\n")
     return 0
 
 
+# handling a debug print statement in logging or console according to vars
 def DBG(mess):
     global DebugLogFName
-    print("DBG(): " + mess)
+    mess = "[DBG] :: " + mess
+
+    if PrintDebugMessages:
+        print(mess)
+
+    if LogDebugMessages:
+        now = datetime.datetime.now()
+        TimeStamp_string = "[" + now.strftime("%d/%m/%Y %H:%M:%S") + "] "
+
+        if DebugLogFName == "":
+            print("No Debug Log File specified, defaulting to DebugLog_<date_time>.txt")
+            DebugLogFName = "DebugLog_" + DateTimeStart.strftime("%Y%m%d_%H%M") + ".txt"
+
+        with open(DebugLogFName, 'a') as f:
+            f.write(TimeStamp_string + mess + "\n")
     return
 
 
+# Use this instead of print to handle if/where the output is shown
 def Console(mess):
     global ConsoleOutFName
-    print("Console(): " + mess)
 
     if PrintConsoleOutput:
         print(mess)
 
-        if LogConsoleOutput:
-            if ConsoleOutFName == "":
-                DBG("No Console Output File specified, defaulting to ConsoleOut.txt")
-                ConsoleOutFName = "ConsoleOut.txt"
+    if LogConsoleOutput:
+        now = datetime.datetime.now()
+        TimeStamp_string = "[" + now.strftime("%d/%m/%Y %H:%M:%S") + "] "
 
-            with open(ConsoleOutFName, 'a') as f:
-                f.write(mess + "\n")
+        if ConsoleOutFName == "":
+            print("No Console Output File specified, defaulting to ConsoleOut_<date_time>.txt")
+            ConsoleOutFName = "ConsoleOut_" + DateTimeStart.strftime("%Y%m%d_%H%M") + ".txt"
 
+        with open(ConsoleOutFName, 'a') as f:
+            f.write(TimeStamp_string + mess + "\n")
     return
 
 
